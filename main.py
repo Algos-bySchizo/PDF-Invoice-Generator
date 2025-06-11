@@ -163,6 +163,24 @@ def export_to_json(invoice):
     }
     return json.dumps(data, indent=2)
 
+#Functions to get valid integer and float values form the user!
+
+def get_float_input(prompt: str) -> float:
+    """Get a valid float input from user."""
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Please enter a valid number.")
+
+def get_int_input(prompt: str) -> int:
+    """Get a valid integer input from user."""
+    while True:
+        try:
+            return int(input(prompt))
+        except ValueError:
+            print("Please enter a valid integer.")
+
 def generate_pdf(inovice,filename=None):
     if filename is None:
         filename=f"inovice_{invoice.invoice_number}.pdf"
@@ -180,7 +198,15 @@ def main():
         address=input('Client\'s address: ')
         )
     invoice=Invoice(client)
-    print('Enter bought Items')
+    print('Enter bought Items: (enter "done" to stop adding items) :')
+    while True:
+        item_name=input('Enter Item (enter "done" to stop adding items) :').strip()
+        if item_name.lower()=='done':
+            break
+        if not item_name:
+            print('❌Item name field cannot be left empty!')
+            continue
+        quantity=input()
     # def calculate_total(self):
     #     subtotal=self.calculate_subtotal()
     #     tax_amount=subtotal*self.tax_rate
