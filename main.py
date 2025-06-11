@@ -1,6 +1,13 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List, Optional
 from datetime import datetime
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import os
+import json
 # Declarative Approach in creating a Client Class
 # class Client():
 #     def __init__(self, name,email,address,contact: Optional[int]=None):
@@ -63,12 +70,12 @@ class Invoice():
 
 #Functional Programming that will be used in PDF generation and Report Generation in Terminal and JSON format!
 
-def calculate_subtotal(self):
+def calculate_subtotal(items):
     # subtotal=0
     # for item in self.items:
     #     subtotal+=item.price_cal()
     # return subtotal
-    return sum(item.price_cal() for item in self.items)
+    return sum(item.price_cal() for item in items)
 
 
 def apply_discount(subtotal,discount,discount_type):
@@ -85,7 +92,7 @@ def format_currency(amount):
     return f"PKR{amount:.2f}"
 
 
-#This Formatting was generated with chatGPT
+#This Formatting was generated using AI-chatGPT
 def format_invoice(invoice):
     subtotal=calculate_subtotal(invoice.items)
     discounted= apply_discount(subtotal,invoice.discount,invoice.discount_type)
@@ -108,6 +115,7 @@ def format_invoice(invoice):
             f"{item.name:<18} {item.quantity:>3} {format_currency(item.price):>8} "
             f"{format_currency(item.get_total()):>8}"
         )
+
     output.extend([
         "----------------------------------------",
         f"Subtotal: {format_currency(subtotal):>31}",
@@ -119,16 +127,69 @@ def format_invoice(invoice):
     
     return "\n".join(output)
 
+#Generating JSON file was done using AI-ChatGPT
 
-    def calculate_total(self):
-        subtotal=self.calculate_subtotal()
-        tax_amount=subtotal*self.tax_rate
-        if self.discount_type.lower()=='flat':
-            discount_amount=self.discount
-        elif self.discount_type.lower()=='percentage':
-            discount_amount=subtotal*(self.discount/100)
-        else:
-            discount_amount=0
-        total=subtotal+tax_amount-discount_amount
-        return total
-    def format_currency(amount):
+def export_to_json(invoice):
+    data = {
+        "invoice_number": invoice.invoice_number,
+        "date": invoice.date.isoformat(),
+        "client": {
+            "name": invoice.client.name,
+            "email": invoice.client.email,
+            "address": invoice.client.address,
+            "phone": invoice.client.phone
+        },
+        "items": [
+            {
+                "name": item.name,
+                "quantity": item.quantity,
+                "price": item.price,
+                "total": item.get_total()
+            }
+            for item in invoice.items
+        ],
+        "subtotal": calculate_subtotal(invoice.items),
+        "discount": invoice.discount,
+        "discount_type": invoice.discount_type,
+        "tax_rate": invoice.tax_rate,
+        "total": apply_tax(
+            apply_discount(
+                calculate_subtotal(invoice.items),
+                invoice.discount,
+                invoice.discount_type
+            ),
+            invoice.tax_rate
+        )
+    }
+    return json.dumps(data, indent=2)
+
+def generate_pdf(inovice,filename=None):
+    if filename is None:
+        filename=f"inovice_{invoice.invoice_number}.pdf"
+    doc=SimpleDocTemplate(filename,pagesize=letter)
+    styles=getSampleStyleSheet()
+    elements=[]
+
+def main():
+    print("=== Invoice Generator ===")
+    print("\nEnter Client Information:")
+    client=Client(
+        name=input('Client\'s Name: '),
+        email=input('Client\'s email: '),
+        contact=input('Client\'s contact no. (optional, press Enter to skip): ') or None,
+        address=input('Client\'s address: ')
+        )
+    invoice=Invoice(client)
+    print('Enter bought Items')
+    # def calculate_total(self):
+    #     subtotal=self.calculate_subtotal()
+    #     tax_amount=subtotal*self.tax_rate
+    #     if self.discount_type.lower()=='flat':
+    #         discount_amount=self.discount
+    #     elif self.discount_type.lower()=='percentage':
+    #         discount_amount=subtotal*(self.discount/100)
+    #     else:
+    #         discount_amount=0
+    #     total=subtotal+tax_amount-discount_amount
+    #     return total
+    # def format_currency(amount):
