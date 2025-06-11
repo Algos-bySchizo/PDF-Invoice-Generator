@@ -46,28 +46,80 @@ class Invoice():
         self.discount_type='flat'
     def add_item(self,item):
         self.items.append(item)
+    
+    
     def remove_item(self,index):
         # if index>=0 and index<len(self.items):
         self.items.pop(index) if (0 <= index < len(self.items)) else None
+    
+    
     def set_tax_rate(self,rate):
         self.tax_rate=rate
+    
+    
     def set_discount(self,amount,discount_type):
         self.discount=amount
         self.discount_type=discount_type
 
 #Functional Programming that will be used in PDF generation and Report Generation in Terminal and JSON format!
+
 def calculate_subtotal(self):
-    return sum(item.price_cal() for item in self.items)
     # subtotal=0
     # for item in self.items:
     #     subtotal+=item.price_cal()
     # return subtotal
+    return sum(item.price_cal() for item in self.items)
+
+
 def apply_discount(subtotal,discount,discount_type):
     if discount_type=='percentage':
         return subtotal*(1-discount)
     return subtotal-discount
+
+
 def apply_tax(amount,tax_rate):
-    return 
+    return amount * (1 + tax_rate)
+
+
+def format_currency(amount):
+    return f"PKR{amount:.2f}"
+
+
+#This Formatting was generated with chatGPT
+def format_invoice(invoice):
+    subtotal=calculate_subtotal(invoice.items)
+    discounted= apply_discount(subtotal,invoice.discount,invoice.discount_type)
+    total=apply_tax(discounted,invoice.tax_rate)
+    output = [
+        f"Invoice Number: {invoice.invoice_number}",
+        f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}",
+        "\nClient Information:",
+        f"Name: {invoice.client.name}",
+        f"Email: {invoice.client.email}",
+        f"Address: {invoice.client.address}",
+        f"Phone: {invoice.client.phone or 'N/A'}",
+        "\nItems:",
+        "----------------------------------------",
+        "Item Name          Qty    Price    Total"
+        "----------------------------------------"
+    ]
+    for item in invoice.items:
+        output.append(
+            f"{item.name:<18} {item.quantity:>3} {format_currency(item.price):>8} "
+            f"{format_currency(item.get_total()):>8}"
+        )
+    output.extend([
+        "----------------------------------------",
+        f"Subtotal: {format_currency(subtotal):>31}",
+        f"Discount: {format_currency(invoice.discount):>31}",
+        f"Tax ({invoice.tax_rate*100:.1f}%): {format_currency(subtotal * invoice.tax_rate):>25}",
+        "----------------------------------------",
+        f"Total: {format_currency(total):>33}"
+    ])
+    
+    return "\n".join(output)
+
+
     def calculate_total(self):
         subtotal=self.calculate_subtotal()
         tax_amount=subtotal*self.tax_rate
