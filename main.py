@@ -217,15 +217,21 @@ def main():
             print('\n no items added. Exiting...')
             return
     tax_rate=get_float_input("\nEnter tax rate (e.g., 0.1 for 10%): ")
-    # def calculate_total(self):
-    #     subtotal=self.calculate_subtotal()
-    #     tax_amount=subtotal*self.tax_rate
-    #     if self.discount_type.lower()=='flat':
-    #         discount_amount=self.discount
-    #     elif self.discount_type.lower()=='percentage':
-    #         discount_amount=subtotal*(self.discount/100)
-    #     else:
-    #         discount_amount=0
-    #     total=subtotal+tax_amount-discount_amount
-    #     return total
-    # def format_currency(amount):
+    while tax_rate<0:
+        print("Tax rate cannot be negative. Please try again.")
+        tax_rate = get_float_input("Enter tax rate (e.g., 0.1 for 10%): ")
+    invoice.set_tax_rate(tax_rate)
+
+    discount_type = input("\nDiscount type (flat/percentage): ").lower()
+    while discount_type not in ['flat', 'percentage']:
+        print("Invalid discount type. Please enter 'flat' or 'percenta  ge'.")
+        discount_type = input("Discount type (flat/percentage): ").lower()
+    discount = get_float_input("Enter discount amount: ")
+    while discount < 0:
+        print("Discount cannot be negative. Please try again.")
+        discount = get_float_input("Enter discount amount: ")
+    invoice.set_discount(discount, discount_type)
+    print(format_invoice(invoice))
+    
+if __name__ == "__main__":
+    main() 
