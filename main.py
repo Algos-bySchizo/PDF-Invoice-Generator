@@ -165,23 +165,21 @@ def export_to_json(invoice):
 
 #Functions to get valid integer and float values form the user!
 
-def get_float_input(prompt: str) -> float:
-    """Get a valid float input from user."""
+def get_float_input(prompt):
     while True:
         try:
             return float(input(prompt))
         except ValueError:
             print("Please enter a valid number.")
 
-def get_int_input(prompt: str) -> int:
-    """Get a valid integer input from user."""
+def get_int_input(prompt):
     while True:
         try:
             return int(input(prompt))
         except ValueError:
             print("Please enter a valid integer.")
 
-def generate_pdf(inovice,filename=None):
+def generate_pdf(invoice,filename=None):
     if filename is None:
         filename=f"inovice_{invoice.invoice_number}.pdf"
     doc=SimpleDocTemplate(filename,pagesize=letter)
@@ -204,9 +202,21 @@ def main():
         if item_name.lower()=='done':
             break
         if not item_name:
-            print('❌Item name field cannot be left empty!')
+            print('❌ Item name field cannot be left empty!')
             continue
-        quantity=input()
+        quantity=get_int_input("Quantity: ")
+        if quantity<=0:
+            print('❌ Quantity must be greater than 0. Please try again!')
+            continue
+        price=get_float_input('Price Per Unit: ')
+        if price<0:
+            print("❌ Price can not be negative. Please try again!")
+        invoice.add_item(Item(item_name,quantity,price))
+        print(f"added {quantity}x{item_name} at PKR{price:.2f} each")
+        if not invoice.items:
+            print('\n no items added. Exiting...')
+            return
+    tax_rate=get_float_input("\nEnter tax rate (e.g., 0.1 for 10%): ")
     # def calculate_total(self):
     #     subtotal=self.calculate_subtotal()
     #     tax_amount=subtotal*self.tax_rate
