@@ -178,13 +178,84 @@ def get_int_input(prompt):
             return int(input(prompt))
         except ValueError:
             print("Please enter a valid integer.")
-
-def generate_pdf(invoice,filename=None):
+#This was generated using ChatGPT PD 
+def generate_pdf(invoice: Invoice, filename: str = None) -> str:
+    """Generate a PDF invoice."""
     if filename is None:
-        filename=f"inovice_{invoice.invoice_number}.pdf"
-    doc=SimpleDocTemplate(filename,pagesize=letter)
-    styles=getSampleStyleSheet()
-    elements=[]
+        filename = f"invoice_{invoice.invoice_number}.pdf"
+    
+    # Create the PDF document
+    doc = SimpleDocTemplate(filename, pagesize=letter)
+    styles = getSampleStyleSheet()
+    elements = []
+    
+    # Add title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30
+    )
+    elements.append(Paragraph("INVOICE", title_style))
+    
+    # Add invoice details
+    elements.append(Paragraph(f"Invoice Number: {invoice.invoice_number}", styles["Normal"]))
+    elements.append(Paragraph(f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}", styles["Normal"]))
+    elements.append(Spacer(1, 20))
+    
+    # Add client information
+    elements.append(Paragraph("Client Information:", styles["Heading2"]))
+    elements.append(Paragraph(f"Name: {invoice.client.name}", styles["Normal"]))
+    elements.append(Paragraph(f"Email: {invoice.client.email}", styles["Normal"]))
+    elements.append(Paragraph(f"Address: {invoice.client.address}", styles["Normal"]))
+    if invoice.client.phone:
+        elements.append(Paragraph(f"Phone: {invoice.client.phone}", styles["Normal"]))
+    elements.append(Spacer(1, 20))
+    
+    # Add items table
+    elements.append(Paragraph("Items:", styles["Heading2"]))
+    
+    # Table data
+    data = [["Item Name", "Quantity", "Price", "Total"]]
+    for item in invoice.items:
+        data.append([
+            item.name,
+            str(item.quantity),
+            format_currency(item.price),
+            format_currency(item.get_total())
+        ])
+    
+    # Create table
+    table = Table(data, colWidths=[3*inch, 1*inch, 1.5*inch, 1.5*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 20))
+    
+    # Add totals
+    subtotal = calculate_subtotal(invoice.items)
+    discounted = apply_discount(subtotal, invoice.discount, invoice.discount_type)
+    total = apply_tax(discounted, invoice.tax_rate)
+    
+    elements.append(Paragraph(f"Subtotal: {format_currency(subtotal)}", styles["Normal"]))
+    elements.append(Paragraph(f"Discount: {format_currency(invoice.discount)}", styles["Normal"]))
+    elements.append(Paragraph(f"Tax ({invoice.tax_rate*100:.1f}%): {format_currency(subtotal * invoice.tax_rate)}", styles["Normal"]))
+    elements.append(Paragraph(f"Total: {format_currency(total)}", styles["Heading2"]))
+    
+    # Build PDF
+    doc.build(elements)
+    return filename
 
 def main():
     print("=== Invoice Generator ===")
@@ -202,15 +273,15 @@ def main():
         if item_name.lower()=='done':
             break
         if not item_name:
-            print('❌ Item name field cannot be left empty!')
+            print('Item name field cannot be left empty!')
             continue
         quantity=get_int_input("Quantity: ")
         if quantity<=0:
-            print('❌ Quantity must be greater than 0. Please try again!')
+            print('Quantity must be greater than 0. Please try again!')
             continue
         price=get_float_input('Price Per Unit: ')
         if price<0:
-            print("❌ Price can not be negative. Please try again!")
+            print("Price can not be negative. Please try again!")
         invoice.add_item(Item(item_name,quantity,price))
         print(f"added {quantity}x{item_name} at PKR{price:.2f} each")
         if not invoice.items:
@@ -232,6 +303,11 @@ def main():
         discount = get_float_input("Enter discount amount: ")
     invoice.set_discount(discount, discount_type)
     print(format_invoice(invoice))
-    
+    print("\n" + "="*50)
+    print(format_invoice(invoice))
+    pdf_filename = generate_pdf(invoice)
+    print(f"\nPDF invoice has been generated: {pdf_filename}")
+    print(f"Full path: {os.path.abspath(pdf_filename)}")
+
 if __name__ == "__main__":
     main() 
