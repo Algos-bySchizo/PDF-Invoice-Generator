@@ -48,7 +48,7 @@ class Invoice():
         self.items: List[Item] = []
         self.invoice_date=datetime.now()
         self.invoice_number=f"INV-{id(self)}"
-        self.tax_rate=0.0
+        self.tax_rate: float=0.0
         self.discount=0.0
         self.discount_type='flat'
     def add_item(self,item):
@@ -99,12 +99,12 @@ def format_invoice(invoice):
     total=apply_tax(discounted,invoice.tax_rate)
     output = [
         f"Invoice Number: {invoice.invoice_number}",
-        f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}",
+        f"Date: {invoice.invoice_date.strftime('%Y-%m-%d %H:%M:%S')}",
         "\nClient Information:",
         f"Name: {invoice.client.name}",
         f"Email: {invoice.client.email}",
         f"Address: {invoice.client.address}",
-        f"Phone: {invoice.client.phone or 'N/A'}",
+        f"Phone: {invoice.client.contact or 'N/A'}",
         "\nItems:",
         "----------------------------------------",
         "Item Name          Qty    Price    Total"
@@ -132,12 +132,12 @@ def format_invoice(invoice):
 def export_to_json(invoice):
     data = {
         "invoice_number": invoice.invoice_number,
-        "date": invoice.date.isoformat(),
+        "date": invoice.inovice_date.isoformat(),
         "client": {
             "name": invoice.client.name,
             "email": invoice.client.email,
             "address": invoice.client.address,
-            "phone": invoice.client.phone
+            "phone": invoice.client.contact
         },
         "items": [
             {
@@ -163,7 +163,6 @@ def export_to_json(invoice):
     }
     return json.dumps(data, indent=2)
 
-#Functions to get valid integer and float values form the user!
 
 def get_float_input(prompt):
     while True:
@@ -179,8 +178,7 @@ def get_int_input(prompt):
         except ValueError:
             print("Please enter a valid integer.")
 #This was generated using ChatGPT PD 
-def generate_pdf(invoice: Invoice, filename: str = None) -> str:
-    """Generate a PDF invoice."""
+def generate_pdf(invoice, filename= None):
     if filename is None:
         filename = f"invoice_{invoice.invoice_number}.pdf"
     
