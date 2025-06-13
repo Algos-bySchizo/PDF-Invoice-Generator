@@ -198,7 +198,7 @@ def generate_pdf(invoice, filename= None):
     
     # Add invoice details
     elements.append(Paragraph(f"Invoice Number: {invoice.invoice_number}", styles["Normal"]))
-    elements.append(Paragraph(f"Date: {invoice.date.strftime('%Y-%m-%d %H:%M:%S')}", styles["Normal"]))
+    elements.append(Paragraph(f"Date: {invoice.invoice_date.strftime('%Y-%m-%d %H:%M:%S')}", styles["Normal"]))
     elements.append(Spacer(1, 20))
     
     # Add client information
@@ -218,9 +218,9 @@ def generate_pdf(invoice, filename= None):
     for item in invoice.items:
         data.append([
             item.name,
-            str(item.quantity),
+            str(item.qty),
             format_currency(item.price),
-            format_currency(item.get_total())
+            format_currency(item.price_cal())
         ])
     
     # Create table

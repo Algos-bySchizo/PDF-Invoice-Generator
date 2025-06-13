@@ -28,7 +28,7 @@ def create_invoice():
     for item_data in data['items']:
         item = Item(
             name=item_data['name'],
-            qty=int(item_data['qty']),
+            qty=int(item_data['quantity']),
             price=float(item_data['price'])
         )
         invoice.add_item(item)
