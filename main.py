@@ -1,13 +1,12 @@
 from dataclasses import dataclass
-from typing import List, Optional
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-import os
 import json
+import os
 # Declarative Approach in creating a Client Class
 # class Client():
 #     def __init__(self, name,email,address,contact: Optional[int]=None):
@@ -21,7 +20,7 @@ class Client:
     name:str 
     email:str 
     address:str 
-    contact:Optional[int]=None 
+    contact:None 
 # Declarative Approach in creating an Item Class
 # class Item():
 #     def __init__(self, name,qty,price):
@@ -45,7 +44,7 @@ class Item:
 class Invoice():
     def __init__(self, client):
         self.client=client
-        self.items: List[Item] = []
+        self.items= []
         self.invoice_date=datetime.now()
         self.invoice_number=f"INV-{id(self)}"
         self.tax_rate: float=0.0
