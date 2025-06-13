@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List, Optional
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -20,7 +21,7 @@ class Client:
     name:str 
     email:str 
     address:str 
-    contact:None 
+    contact:Optional[int]=None 
 # Declarative Approach in creating an Item Class
 # class Item():
 #     def __init__(self, name,qty,price):
@@ -111,8 +112,8 @@ def format_invoice(invoice):
     ]
     for item in invoice.items:
         output.append(
-            f"{item.name:<18} {item.quantity:>3} {format_currency(item.price):>8} "
-            f"{format_currency(item.get_total()):>8}"
+            f"{item.name:<18} {item.qty:>3} {format_currency(item.price):>8} "
+            f"{format_currency(item.price_cal()):>8}"
         )
 
     output.extend([
@@ -131,7 +132,7 @@ def format_invoice(invoice):
 def export_to_json(invoice):
     data = {
         "invoice_number": invoice.invoice_number,
-        "date": invoice.inovice_date.isoformat(),
+        "date": invoice.invoice_date.isoformat(),
         "client": {
             "name": invoice.client.name,
             "email": invoice.client.email,
@@ -141,9 +142,9 @@ def export_to_json(invoice):
         "items": [
             {
                 "name": item.name,
-                "quantity": item.quantity,
+                "quantity": item.qty,
                 "price": item.price,
-                "total": item.get_total()
+                "total": item.price_cal()
             }
             for item in invoice.items
         ],
@@ -205,8 +206,8 @@ def generate_pdf(invoice, filename= None):
     elements.append(Paragraph(f"Name: {invoice.client.name}", styles["Normal"]))
     elements.append(Paragraph(f"Email: {invoice.client.email}", styles["Normal"]))
     elements.append(Paragraph(f"Address: {invoice.client.address}", styles["Normal"]))
-    if invoice.client.phone:
-        elements.append(Paragraph(f"Phone: {invoice.client.phone}", styles["Normal"]))
+    if invoice.client.contact:
+        elements.append(Paragraph(f"Phone: {invoice.client.contact}", styles["Normal"]))
     elements.append(Spacer(1, 20))
     
     # Add items table

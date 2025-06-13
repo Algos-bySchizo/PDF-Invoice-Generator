@@ -18,7 +18,7 @@ def create_invoice():
         name=data['client']['name'],
         email=data['client']['email'],
         address=data['client']['address'],
-        phone=data['client'].get('phone')
+        contact=data['client'].get('contact')
     )
     
     # Create invoice
@@ -28,7 +28,7 @@ def create_invoice():
     for item_data in data['items']:
         item = Item(
             name=item_data['name'],
-            quantity=int(item_data['quantity']),
+            qty=int(item_data['qty']),
             price=float(item_data['price'])
         )
         invoice.add_item(item)
