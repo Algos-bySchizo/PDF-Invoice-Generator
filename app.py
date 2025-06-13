@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
 from main import Client, Item, Invoice, generate_pdf
 import os
-from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
